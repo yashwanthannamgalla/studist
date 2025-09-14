@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Studist Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=3) }}">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="brand">📘 Studist</div>
+    <div class="nav-links">
+      <a href="{{ url_for('timetable', user=username) }}">🕒 Timetable</a>
+      <a href="{{ url_for('view_reminders', user=username) }}">🔔 Reminders</a>
+      <a href="{{ url_for('assignments', user=username) }}">📝 Assignments</a>
+      <a href="{{ url_for('upload', user=username) }}">📂 Upload</a>
+      <a href="{{ url_for('add_schedule', user=username) }}">➕ Add Schedule</a>
+      <a href="{{ url_for('logout') }}">🚪 Logout</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="sidebar">
+      <h3>👤 {{ username }}</h3>
+      <ul>
+        <li><a href="{{ url_for('profile', user=username) }}">👤 Edit Profile</a></li>
+        <li><a href="#">📂 My Account</a></li>
+        <li><a href="#">🏆 Achievements</a></li>
+        <li><a href="#">⚙️ Settings</a></li>
+        <li><a href="{{ url_for('logout') }}">🚪 Logout</a></li>
+      </ul>
+    </div>
+
+    <div class="content">
+      <section class="block">
+        <h2>Your Schedules</h2>
+        <ul>
+          {% for schedule in schedules %}
+            <li>
+              <strong>{{ schedule.title }}</strong> — {{ schedule.date }}
+              <form action="{{ url_for('delete_schedule') }}" method="POST" style="display:inline;">
+                <input type="hidden" name="username" value="{{ username }}">
+                <input type="hidden" name="title" value="{{ schedule.title }}">
+                <button type="submit" class="btn" title="Delete" style="margin-left:8px;">🗑️</button>
+              </form><br>
+              <span>{{ schedule.notes }}</span>
+            </li>
+          {% else %}
+            <li>🗓️ No schedules found.</li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="block">
+        <h2>Your Reminders</h2>
+        <ul>
+          {% for note in reminders %}
+            <li class="reminder">{{ note }}</li>
+          {% else %}
+            <li>🔕 No reminders yet.</li>
+          {% endfor %}
+        </ul>
+        <a class="btn" href="{{ url_for('add_reminder', user=username) }}">➕ Add Reminder</a>
+      </section>
+
+      <section class="block">
+        <h2>Your Uploaded Files</h2>
+        <ul>
+          {% for file in files %}
+            <li><a href="{{ url_for('uploaded_file', username=username, filename=file) }}" target="_blank">{{ file }}</a>
+              <form action="{{ url_for('delete_file') }}" method="POST" style="display:inline;">
+                <input type="hidden" name="username" value="{{ username }}">
+                <input type="hidden" name="filename" value="{{ file }}">
+                <button type="submit" class="btn btn-danger" style="margin-left:8px;">Delete</button>
+              </form>
+            </li>
+          {% else %}
+            <li>📁 No files uploaded.</li>
+          {% endfor %}
+        </ul>
+      </section>
+    </div>
+
+    <div class="right-panel">
+      <div class="widget">
+        <h2>🤖 AI Assistant</h2>
+        <div class="chat-box" id="chat-box">
+          <p>Hello {{ username }}, how can I help you?</p>
+        </div>
+        <textarea id="user-input" placeholder="Type your message..."></textarea>
+        <button class="btn" onclick="sendMessage()">Send</button>
+      </div>
+
+      <div class="widget">
+        <h2>📅 Calendar</h2>
+        <div id="calendar"></div>
+      </div>
+
+      <div class="widget">
+        <h2>📊 Progress</h2>
+        <div id="progress"></div>
+      </div>
+
+      <div class="widget">
+        <h2>🎵 Music</h2>
+        <iframe style="border-radius:12px"
+                src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M?utm_source=generator"
+                width="100%" height="152" frameborder="0"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Calendar
+      var calendarEl = document.getElementById('calendar');
+      if (calendarEl) {
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          height: 250,
+          events: [{ title: 'Test Event', start: new Date().toISOString().split('T')[0] }]
+        });
+        calendar.render();
+      }
+
+      // Progress
+      fetch('{{ url_for("get_progress", username=username) }}')
+        .then(r => r.json())
+        .then(p => {
+          const el = document.getElementById('progress');
+          el.innerHTML = `
+            <div>Total: ${p.total}</div>
+            <div>Completed: ${p.completed}</div>
+            <div class="progress-bar-container" style="width:100%;background:#e5e7eb;border-radius:10px;height:12px;overflow:hidden;margin-top:6px;">
+              <div class="progress-bar" style="height:100%;width:${p.percentage}%;background:linear-gradient(90deg,#93c5fd,#4a7ec9);"></div>
+            </div>
+          `;
+        });
+    });
+
+    // Chatbot
+    function sendMessage() {
+      const chatBox = document.getElementById('chat-box');
+      const input = document.getElementById('user-input');
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
+
+      chatBox.innerHTML += `<p><strong>You:</strong> ${userMessage}</p>`;
+      input.value = '';
+
+      fetch('{{ url_for("chatbot") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage })
+      })
+      .then(r => r.json())
+      .then(data => {
+        chatBox.innerHTML += `<p><strong>Bot:</strong> ${data.response}</p>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+    }
+  </script>
+</body>
+</html>
