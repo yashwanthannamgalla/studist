@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Timetable | Studist</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f5efe6; margin:0; padding:0; }
+        .auth-container { max-width: 95vw; margin: 20px auto; }
+        h1 { text-align:center; margin-bottom:20px; color:#3b3b98; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border:1px solid #e8dfd2; padding:12px; text-align:center; min-width:100px; }
+        th { background:#3b3b98; color:white; }
+        td.cell { cursor:pointer; transition:0.2s; }
+        td.cell:hover { background:#d0e4ff; }
+        .save-btn { margin-top: 15px; padding:10px 20px; background:#4a7ec9; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600; }
+        .bubble { position:absolute; bottom:-100px; background: rgba(74,126,201,0.2); border-radius:50%; animation: rise 20s infinite ease-in; }
+        @keyframes rise { 0%{transform:translateY(0);opacity:.6;} 50%{transform:translateY(-55vh);opacity:.75;} 100%{transform:translateY(-115vh);opacity:0;} }
+        .bg-anim { position:fixed; inset:0; z-index:1; pointer-events:none; }
+    </style>
+</head>
+<body>
+
+  <!-- Animated bubbles -->
+  <div class="bg-anim">
+    <span class="bubble" style="--x:10%; --s:60px;"></span>
+    <span class="bubble" style="--x:30%; --s:100px;"></span>
+    <span class="bubble" style="--x:50%; --s:80px;"></span>
+    <span class="bubble" style="--x:70%; --s:90px;"></span>
+    <span class="bubble" style="--x:90%; --s:70px;"></span>
+  </div>
+
+  <div class="auth-container">
+    <h1>{{ username }}'s Weekly Timetable</h1>
+    <table id="timetable">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Monday</th>
+          <th>Tuesday</th>
+          <th>Wednesday</th>
+          <th>Thursday</th>
+          <th>Friday</th>
+          <th>Saturday</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for hour in ['8-9','9-10','10-11','11-12','12-1','1-2','2-3','3-4','4-5'] %}
+        <tr>
+          <td>{{ hour }}</td>
+          {% for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] %}
+          <td class="cell" data-day="{{ day }}" data-time="{{ hour }}">
+            {{ timetable.get(day, {}).get(hour, '') }}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button class="save-btn" onclick="saveTimetable()">💾 Save Timetable</button>
+  </div>
+
+<script>
+let timetable = {{ timetable|tojson }};
+
+document.querySelectorAll('.cell').forEach(cell => {
+  cell.addEventListener('click', () => {
+    const subject = prompt("Enter class/subject:");
+    if (!subject) return;
+    const day = cell.dataset.day;
+    const time = cell.dataset.time;
+    if (!timetable[day]) timetable[day] = {};
+    timetable[day][time] = subject;
+    cell.textContent = subject;
+  });
+});
+
+function saveTimetable() {
+  fetch('/save-timetable', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({username:"{{ username }}", timetable})
+  }).then(r=>r.json())
+    .then(d=>alert(d.message))
+    .catch(()=>alert('Error saving timetable'));
+}
+</script>
+</body>
+</html>

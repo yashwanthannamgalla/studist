@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Studist Dashboard</title>
+<link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --blue: #4a7ec9;
+    --soft: #f5f7fb;
+    --card: #fff;
+    --muted: #7a7a7a;
+    --accent: #2f6fb8;
+    --hover: #45aaf2;
+    --gradient: linear-gradient(90deg, #45aaf2 55%, #9b59b6 100%);
+  }
+
+  * { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #f0f4f8 0%, #e8f0fe 100%);
+    color: #1d2336;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  header.navbar {
+    position: sticky;
+    top: 0; 
+    z-index: 999;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 20px 40px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 20px rgba(74, 126, 201, 0.15);
+    border-bottom-left-radius: 20px; 
+    border-bottom-right-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .brand { 
+    font-weight: 700; 
+    font-size: 28px; 
+    color: var(--blue); 
+    display: flex; 
+    align-items: center; 
+    gap: 12px;
+    text-shadow: 0 2px 4px rgba(74, 126, 201, 0.1);
+  }
+
+  nav { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+  }
+
+  nav a {
+    text-decoration: none; 
+    font-weight: 600; 
+    color: #27487e;
+    padding: 12px 18px; 
+    border-radius: 12px; 
+    transition: all 0.3s ease;
+    position: relative;
+    font-size: 14px;
+  }
+
+  nav a:hover { 
+    background: var(--gradient); 
+    color: #fff; 
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(69, 170, 242, 0.3);
+  }
+
+  /* Notification Bell */
+  .notifications { 
+    position: relative; 
+    margin-left: 20px; 
+  }
+
+  .notif-bell {
+    background: #fff; 
+    border: 2px solid #e8f0fe; 
+    font-size: 1.6rem; 
+    border-radius: 50%; 
+    cursor: pointer;
+    width: 48px; 
+    height: 48px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    transition: all 0.3s ease;
+    color: var(--blue);
+  }
+
+  .notif-bell:hover { 
+    background: var(--blue); 
+    color: #fff; 
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(74, 126, 201, 0.3);
+  }
+
+  #notif-badge {
+    position: absolute; 
+    top: -2px; 
+    right: -2px;
+    background: #e74c3c; 
+    color: #fff; 
+    font-size: 11px; 
+    font-weight: 700;
+    border-radius: 50%; 
+    width: 20px; 
+    height: 20px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+    animation: pulse 2s infinite;
+  }
+
+  .notif-dropdown {
+    position: absolute;
+    top: 55px;
+    right: 0;
+    width: 300px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    padding: 20px;
+    display: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+  }
+
+  .notif-dropdown h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--blue);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f4f8;
+  }
+
+  #notif-list {
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  #notif-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f4f8;
+    font-size: 14px;
+    color: #27487e;
+  }
+
+  #notif-list li:last-child {
+    border-bottom: none;
+  }
+
+  #notif-list a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  #notif-list a:hover {
+    color: var(--blue);
+  }
+
+  /* Main Dashboard Layout */
+  main.dashboard { 
+    display: flex; 
+    flex-direction: row; 
+    max-width: 1400px; 
+    margin: 40px auto 20px; 
+    padding: 0 30px; 
+    gap: 30px; 
+    flex-wrap: wrap; 
+  }
+
+  .main-left { 
+    flex: 3; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 25px; 
+    min-width: 0;
+  }
+
+  .sidebar { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px; 
+    min-width: 280px; 
+  }
+
+  /* Card Styles */
+  .card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border-radius: 20px; 
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08); 
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient);
+    border-radius: 20px 20px 0 0;
+  }
+
+  .card:hover { 
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12); 
+    transform: translateY(-5px);
+  }
+
+  h2 { 
+    margin-top: 0; 
+    margin-bottom: 15px;
+    font-size: 1.4rem; 
+    font-weight: 600; 
+    color: #1d2336;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Welcome Card */
+  .welcome-card {
+    background: var(--gradient);
+    color: white;
+    position: relative;
+  }
+
+  .welcome-card::before {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .welcome-card h2 {
+    color: white;
+    font-size: 1.6rem;
+  }
+
+  .welcome-card p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-top: 10px;
+  }
+
+  /* Chat Container */
+  .chat-container { 
+    height: 500px; 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden; 
+  }
+
+  .chat-box { 
+    flex: 1; 
+    overflow-y: auto; 
+    background: #f8fafc; 
+    border-radius: 15px; 
+    padding: 20px; 
+    margin-bottom: 20px;
+    border: 2px solid #e8f0fe;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .chat-box p {
+    margin-bottom: 15px;
+    padding: 12px 15px;
+    border-radius: 12px;
+    max-width: 80%;
+  }
+
+  .chat-box p:nth-child(odd) {
+    background: var(--blue);
+    color: white;
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .chat-box p:nth-child(even) {
+    background: white;
+    border: 2px solid #e8f0fe;
+    color: #1d2336;
+  }
+
+  #chat-input { 
+    resize: none; 
+    min-height: 80px; 
+    font-size: 15px; 
+    padding: 15px 20px; 
+    border-radius: 15px; 
+    border: 2px solid #e8f0fe; 
+    outline: none;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    background: #fff;
+  }
+
+  #chat-input:focus { 
+    border-color: var(--blue); 
+    box-shadow: 0 0 0 3px rgba(74, 126, 201, 0.1);
+  }
+
+  .btn {
+    background: var(--gradient);
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(74, 126, 201, 0.3);
+  }
+
+  /* Sidebar Cards */
+  .sidebar .card {
+    padding: 20px;
+  }
+
+  .sidebar h2 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+  }
+
+  /* Iframe Styles */
+  iframe {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    background: #f8fafc;
+    min-height: 200px;
+  }
+
+  .calendar iframe {
+    height: 250px;
+  }
+
+  .music iframe {
+    height: 152px;
+  }
+
+  /* Stats List */
+  .card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .card li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: #f8fafc;
+    border-radius: 10px;
+    font-weight: 500;
+    border: 1px solid #e8f0fe;
+  }
+
+  .card li::after {
+    content: attr(data-value);
+    background: var(--blue);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    main.dashboard {
+      flex-direction: column;
+      gap: 20px;
+    }
+  }
+</style>
+</head>
+<body>
+<header class="navbar">
+  <div class="brand">📘 Studist</div>
+  <nav>
+    <a href="/timetable?user={{ username }}">🕒 Timetable</a>
+    <a href="/reminders?user={{ username }}">🔔 Reminders</a>
+    <a href="/assignments?user={{ username }}">📝 Assignments</a>
+    <a href="/upload?user={{ username }}">📂 Uploads</a>
+    <a href="/notes?user={{ username }}">🗒 Notes</a>
+    <div class="notifications">
+      <button id="notif-btn" class="notif-bell" aria-label="Notifications">🔔<span id="notif-badge" style="display:none;">0</span></button>
+      <div id="notif-dropdown" class="notif-dropdown">
+        <h4>📢 Notifications</h4>
+        <ul id="notif-list"></ul>
+      </div>
+    </div>
+    <a href="/logout">🚪 Logout</a>
+  </nav>
+</header>
+
+<main class="dashboard">
+  <section class="main-left">
+   <div class="card welcome-card">
+  <h2>📜 Daily Inspiration</h2>
+  <p>{{ daily_quote }}</p>
+</div>
+
+
+    <div class="card chat-container">
+      <h2>🤖 AI Assistant</h2>
+      <div id="chat-box" class="chat-box">
+        <p><b>Bot:</b> Hello {{ username }}! How can I assist you today? Ask me about your schedule, reminders, uploads, or assignments!</p>
+      </div>
+      <textarea id="chat-input" placeholder="Type your message here..."></textarea>
+      <button class="btn" onclick="sendMessage()">Send Message</button>
+    </div>
+  </section>
+
+  <aside class="sidebar">
+    <div class="card calendar">
+      <h2>📅 Calendar</h2>
+      <iframe src="https://calendar.google.com/calendar/embed?src=en.indian%23holiday%40group.v.calendar.google.com&ctz=Asia/Kolkata&bgcolor=%23ffffff&color=%234a7ec9"></iframe>
+    </div>
+    
+    <div class="card music">
+      <h2>🎵 Study Music</h2>
+      <iframe src="{{ spotify_url }}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    </div>
+    
+    <div class="card">
+      <h2>📊 Quick Stats</h2>
+      <ul>
+        <li data-value="{{ files|length }}">Total Files</li>
+        <li data-value="{{ reminders|length }}">Active Reminders</li>
+      </ul>
+    </div>
+  </aside>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const notifBtn = document.getElementById('notif-btn');
+    const notifDrop = document.getElementById('notif-dropdown');
+    
+    notifBtn.onclick = (e) => {
+      e.stopPropagation();
+      notifDrop.style.display = (notifDrop.style.display === 'block') ? 'none' : 'block';
+    };
+    
+    document.onclick = (e) => { 
+      if (!notifDrop.contains(e.target) && e.target !== notifBtn) {
+        notifDrop.style.display = 'none'; 
+      }
+    };
+
+    async function fetchNotifications() {
+      try {
+        const res = await fetch('/notifications_data?user={{ username }}');
+        const data = await res.json();
+        
+        const filtered = data.filter(n => !n.text.toLowerCase().includes('timetable'));
+        
+        const badge = document.getElementById('notif-badge');
+        badge.textContent = filtered.length;
+        badge.style.display = filtered.length ? 'flex' : 'none';
+        
+        const listEl = document.getElementById('notif-list');
+        listEl.innerHTML = '';
+        
+        if (!filtered.length) { 
+          listEl.innerHTML = '<li>No notifications yet</li>'; 
+          return; 
+        }
+        
+        filtered.forEach(n => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = n.link; 
+          a.target = '_blank'; 
+          a.textContent = n.text;
+          li.appendChild(a); 
+          listEl.appendChild(li);
+        });
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+      }
+    }
+    
+    fetchNotifications(); 
+    setInterval(fetchNotifications, 60000);
+  });
+
+  function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim(); 
+    if (!msg) return;
+
+    const chatBox = document.getElementById('chat-box');
+    
+    chatBox.innerHTML += `<p><b>You:</b> ${msg}</p>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+    
+    input.value = '';
+    
+    // Typing indicator
+    const typingId = 'typing-' + Date.now();
+    chatBox.innerHTML += `<p id="${typingId}"><b>Bot:</b> <i>Typing...</i></p>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    fetch('/chatbot', {
+      method: 'POST', 
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({message: msg})
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById(typingId)?.remove();
+      chatBox.innerHTML += `<p><b>Bot:</b> ${data.response}</p>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    })
+    .catch(err => {
+      console.error('Chat error:', err);
+      document.getElementById(typingId)?.remove();
+      chatBox.innerHTML += `<p><b>Bot:</b> Sorry, I'm having trouble responding right now.</p>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+  }
+
+  // Send message on Enter key
+  document.getElementById('chat-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+</script>
+</body>
+</html>

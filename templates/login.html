@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login | StudyPath</title>
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,600&display=swap" rel="stylesheet" />
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(120deg,#45aaf2 0%,#9b59b6 55%,#fbc531 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+    .bg-anim {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .bubble {
+      position: absolute;
+      bottom: -120px;
+      left: var(--x);
+      width: var(--s);
+      height: var(--s);
+      background: rgba(59,59,152,0.16);
+      border-radius: 50%;
+      animation: rise var(--d) linear infinite;
+      filter: blur(1px);
+    }
+    @keyframes rise {
+      0% { transform: translateY(0); opacity: .8; }
+      100% { transform: translateY(-110vh); opacity: 0; }
+    }
+    .auth-body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .auth-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+    .login-card {
+      background: rgba(255,255,255,0.98);
+      padding: 44px 44px 32px 44px;
+      border-radius: 28px;
+      box-shadow: 0 10px 38px #45aaf255;
+      max-width: 350px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+    .login-card h2 {
+      margin-bottom: 22px;
+      font-size: 1.6rem;
+      color: #5636b0;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    form {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 12px;
+    }
+    input[type="text"], input[type="password"] {
+      padding: 14px 18px;
+      border-radius: 15px;
+      border: 1.5px solid #b6baff;
+      background: #f6f8ff;
+      color: #234;
+      font-size: 1.07rem;
+      font-family: 'Poppins', sans-serif;
+      transition: border-color 0.22s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #9b59b6;
+      box-shadow: 0 0 12px 2px #9b59b622;
+    }
+    button[type="submit"] {
+      background: linear-gradient(90deg,#45aaf2 40%,#9b59b6 100%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.09rem;
+      padding: 14px 0;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 5px 18px #9b59b613;
+      transition: background 0.24s;
+    }
+    button[type="submit"]:hover {
+      background: linear-gradient(90deg,#fbc531 0%,#45aaf2 100%);
+    }
+    .signup-text {
+      margin-top: 18px;
+      font-size: 0.98rem;
+      color: #27487e;
+    }
+    .signup-text a {
+      color: #5636b0;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.16s;
+    }
+    .signup-text a:hover {
+      color: #45aaf2;
+      text-decoration: underline;
+    }
+    .error-message {
+      background: #ffeaea;
+      color: #e74c3c;
+      padding: 9px 0;
+      margin-bottom: 16px;
+      border-radius: 12px;
+      font-size: 1.01rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="auth-body">
+  <!-- Floating bubbles background layer -->
+  <div class="bg-anim">
+    <span class="bubble" style="--x:10%; --d:18s; --s:80px;"></span>
+    <span class="bubble" style="--x:30%; --d:22s; --s:120px;"></span>
+    <span class="bubble" style="--x:60%; --d:20s; --s:60px;"></span>
+    <span class="bubble" style="--x:80%; --d:25s; --s:100px;"></span>
+  </div>
+
+  <div class="auth-container">
+    <div class="login-card">
+      <h2>Welcome Back 👋</h2>
+      {% if error %}
+        <div class="error-message">{{ error }}</div>
+      {% endif %}
+      <form method="POST">
+        <input type="text" name="username" placeholder="👤 Username" required>
+        <input type="password" name="password" placeholder="🔒 Password" required>
+        <button type="submit">Login 🚀</button>
+      </form>
+      <p class="signup-text">
+        Don't have an account? <a href="/signup">Sign up</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

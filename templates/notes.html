@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ user }}'s Notes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background: #f0f4f8;
+      color: #1d2336;
+    }
+    h1 {
+      text-align: center;
+      color: #4a7ec9;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(74,126,201,0.1);
+    }
+    .notes-list {
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid #dae6f9;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    .note-item {
+      padding: 8px 12px;
+      border-top: 1px solid #dae6f9;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+    }
+    .note-item:first-child {
+      border-top: none;
+    }
+    .note-title {
+      font-weight: bold;
+      max-width: 80%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    button.delete-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button.delete-btn:hover {
+      background: #dc2626;
+    }
+    form.note-form {
+      display: flex;
+      flex-direction: column;
+    }
+    input[type="text"], input[type="date"], textarea {
+      padding: 8px;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: 2px solid #dae6f9;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+    }
+    textarea {
+      height: 120px;
+    }
+    button.save-btn {
+      background: #4a7ec9;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: auto;
+      width: 100%;
+    }
+    button.save-btn:hover {
+      background: #3b6ac9;
+    }
+  </style>
+  <script>
+    function editNote(index) {
+      const notes = {{ notes|tojson }};
+      const note = notes[index];
+      document.getElementById('title').value = note.title;
+      document.getElementById('content').value = note.content;
+      document.getElementById('date').value = note.date || '';
+      document.getElementById('index').value = index;
+      window.scrollTo(0, 0);
+    }
+    function clearForm() {
+      document.getElementById('title').value = '';
+      document.getElementById('content').value = '';
+      document.getElementById('date').value = '';
+      document.getElementById('index').value = '';
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>{{ user }}'s Notes</h1>
+    <div class="notes-list">
+      {% for note in notes %}
+        <div class="note-item" onclick="editNote({{ loop.index0 }})">
+          <div class="note-title">{{ note.title }}</div>
+          <form method="POST" style="margin:0;" onsubmit="return confirm('Delete this note?');">
+            <input type="hidden" name="index" value="{{ loop.index0 }}" />
+            <input type="hidden" name="action" value="delete" />
+            <button type="submit" class="delete-btn">Delete</button>
+          </form>
+        </div>
+      {% else %}
+        <p>No notes yet. Create one below!</p>
+      {% endfor %}
+    </div>
+    <form method="POST" class="note-form">
+      <input type="hidden" id="index" name="index" value="" />
+      <input type="hidden" name="action" value="save" />
+      <input type="text" id="title" name="title" placeholder="Title" required />
+      <textarea id="content" name="content" placeholder="Your note..." required></textarea>
+      <input type="date" id="date" name="date" />
+      <button type="submit" class="save-btn">Save Note</button>
+      <button type="button" onclick="clearForm()" style="margin-top:10px; width:100%;">New Note</button>
+    </form>
+  </div>
+</body>
+</html>

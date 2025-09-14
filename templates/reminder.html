@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ username }}'s Reminders</title>
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg,#f0f6ff, #e0f7fa);
+      margin: 0; padding: 40px 20px;
+      color: #1d2336;
+      min-height: 100vh;
+      display: flex; justify-content: center;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      max-width: 720px;
+      width: 90%;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+      padding: 30px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    h2 {
+      font-size: 2rem;
+      font-weight: 600;
+      text-align: center;
+      margin: 0;
+      color: #2e4465;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 340px;
+      overflow-y: auto;
+    }
+    li {
+      background: #f0f6ff;
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 6px 18px rgba(74,126,201,0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    li:hover {
+      box-shadow: 0 10px 30px rgba(74,126,201,0.12);
+      transform: translateY(-3px);
+    }
+    strong {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #2e4465;
+    }
+    small {
+      font-size: 0.9rem;
+      color: #6a7987;
+    }
+    form.delete-form {
+      display: inline;
+    }
+    form.delete-form button {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 7px 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: filter 0.2s ease;
+    }
+    form.delete-form button:hover {
+      filter: brightness(0.9);
+    }
+    /* Add Reminder Form */
+    form.add-reminder {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    form.add-reminder input, form.add-reminder button {
+      border-radius: 12px;
+      border: 2px solid #c5dbf7;
+      padding: 12px 16px;
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.3s ease;
+      flex-grow: 1;
+      min-width: 150px;
+      max-width: 320px;
+      outline: none;
+    }
+    form.add-reminder input[type="text"] {
+      flex-grow: 2;
+    }
+    form.add-reminder input:focus {
+      border-color: var(--blue, #4a7ec9);
+      box-shadow: 0 0 10px rgba(74,126,201,0.3);
+    }
+    form.add-reminder button {
+      background: linear-gradient(90deg,#45aaf2 55%,#9b59b6 100%);
+      color: white;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      max-width: 140px;
+      flex-grow: 0;
+    }
+    form.add-reminder button:hover {
+      filter: brightness(1.1);
+    }
+    /* Empty msg styling */
+    .empty-msg {
+      text-align: center;
+      color: #819bb3;
+      font-style: italic;
+      padding: 50px 0;
+      font-size: 1.1rem;
+    }
+    /* Back to Dashboard button styling */
+    .back-btn {
+      margin: 30px auto 0 auto;
+      background: linear-gradient(90deg,#45aaf2,#9b59b6);
+      color: white;
+      padding: 14px 36px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      width: max-content;
+      transition: filter 0.3s ease;
+    }
+    .back-btn:hover {
+      filter: brightness(1.15);
+    }
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      form.add-reminder {
+        flex-direction: column;
+      }
+      form.add-reminder input, form.add-reminder button {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔔 {{ username }}'s Reminders</h2>
+
+    <ul>
+      {% if reminders %}
+        {% for r in reminders %}
+          <li>
+            <div>
+              <strong>{{ r.title }}</strong><br>
+              <small>{{ r.date }} {% if r.time %}- {{ r.time }}{% endif %}</small>
+            </div>
+            <form action="/delete-reminder" method="POST" class="delete-form">
+              <input type="hidden" name="username" value="{{ username }}">
+              <input type="hidden" name="title" value="{{ r.title }}">
+              <button type="submit">🗑️ Delete</button>
+            </form>
+          </li>
+        {% endfor %}
+      {% else %}
+        <div class="empty-msg">No reminders yet.</div>
+      {% endif %}
+    </ul>
+
+    <form action="/add-reminder?user={{ username }}" method="POST" class="add-reminder">
+      <input type="text" name="title" placeholder="Reminder title..." required />
+      <input type="date" name="date" />
+      <input type="time" name="time" />
+      <button type="submit">➕ Add Reminder</button>
+    </form>
+  </div>
+
+  <a href="/dashboard?user={{ username }}" class="back-btn">⬅ Back to Dashboard</a>
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Timetable — Studist</title>
+
+  <style>
+    :root{
+      --blue:#4a7ec9;
+      --soft:#f5f7fb;
+      --card:#ffffff;
+      --muted:#7a7a7a;
+      --accent:#2f6fb8;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#eef4fb 0%, #f8fbff 100%);
+      color:#222;
+    }
+    header{
+      background:var(--blue); color:#fff; padding:18px 22px; display:flex; justify-content:space-between; align-items:center;
+      box-shadow: 0 6px 18px rgba(63,81,181,0.08);
+    }
+    header h1{margin:0; font-size:20px; font-weight:600}
+    header .meta{font-size:14px; opacity:.95}
+    .wrap{max-width:1100px; margin:26px auto; padding:18px;}
+    .card{
+      background:var(--card); border-radius:14px; padding:18px; box-shadow:0 8px 30px rgba(60,66,87,0.07);
+    }
+    .topbar{display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:12px}
+    .controls{display:flex; gap:8px; align-items:center}
+    .btn{
+      background:var(--accent); color:#fff; border:none; padding:9px 12px; border-radius:9px; cursor:pointer; font-weight:600;
+      box-shadow: 0 6px 18px rgba(47,111,184,0.12);
+      transition: background-color 0.3s ease;
+    }
+    .btn:hover{
+      background: #2a5da0;
+    }
+    .btn.ghost{
+      background:transparent; color:var(--accent); border:1px solid #d8e6fb; box-shadow:none; font-weight:600;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .btn.ghost:hover{
+      background: var(--accent); color:#fff;
+    }
+    .btn.warn{background:#c14a4a}
+    table{width:100%; border-collapse:separate; border-spacing:0; min-width:1200px; margin-top:8px; table-layout: fixed;}
+    th, td{
+      padding:12px 10px; text-align:center; vertical-align:top;
+      border-right: 1px solid #e2e8f0;
+      transition: background-color 0.3s ease;
+    }
+    th{
+      background:var(--blue); color:#fff; font-weight:700; position:sticky; top:0;
+      user-select:none;
+    }
+    tbody tr:nth-child(even) td{background:#fbfeff}
+    tbody tr:hover td{background:#e7f0ff;}
+    .slot{min-width:90px; max-width:90px; position: relative;}
+    select.subject-select{
+      width:100%; padding:8px; border-radius:8px; border:1px solid #d7e7fb; font-weight:600; background:#fff;
+      cursor:pointer;
+      transition: box-shadow 0.3s ease;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="gray"><polygon points="0,0 15,0 7.5,7"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 12px;
+    }
+    select.subject-select:focus{
+      outline:none;
+      border-color: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+    select.subject-select:hover{
+      border-color: var(--accent);
+    }
+    .note{
+      display:block; margin-top:6px; font-size:12px; color:var(--muted); min-height:20px; outline:none; padding:6px 8px; border-radius:8px; border:1px dashed transparent;
+      background-color: #f9fbfd;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+      cursor: text;
+      user-select: text;
+      overflow-wrap: break-word;
+      max-height: 40px;
+      overflow-y: auto;
+    }
+    .note:focus{
+      border-color: #a8c6ff;
+      background-color: #e8f0ff;
+      box-shadow: 0 0 5px rgba(58,98,183,0.7);
+    }
+    .free { color:#9aa3b2; font-style:italic; }
+    .small{font-size:12px; color:var(--muted)}
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(15,23,42,0.45);
+      display:none; align-items:center; justify-content:center; z-index:1200;
+      animation: fadeInBackdrop 0.3s ease forwards;
+    }
+    .modal{
+      background:#fff; width:92%; max-width:560px; border-radius:12px; padding:16px;
+      box-shadow:0 18px 45px rgba(12,13,27,0.25);
+      animation: slideUp 0.4s ease forwards;
+    }
+    .subject-row{
+      display:flex; gap:8px; align-items:center; margin:8px 0;
+      animation: fadeInSubjectRow 0.4s ease forwards;
+    }
+    .subject-row input[type="text"]{
+      flex:1; padding:8px; border-radius:8px; border:1px solid #e6eefb;
+      transition: border-color 0.3s ease;
+    }
+    .subject-row input[type="text"]:focus{
+      border-color: var(--accent);
+      outline:none;
+      box-shadow: 0 0 8px var(--accent);
+    }
+    .subject-row button{
+      background:#ef5350; border:none; color:#fff; padding:6px 8px; border-radius:8px; cursor:pointer;
+      transition: background-color 0.3s ease;
+    }
+    .subject-row button:hover{
+      background:#d13c3c;
+    }
+    .small-muted{font-size:13px; color:#6f7a87}
+    footer{margin-top:12px; text-align:center; color:#6d6d6d; font-size:13px}
+    @media (max-width:880px){ table{min-width:1000px} }
+
+    /* Animations */
+    @keyframes fadeInBackdrop {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+    @keyframes slideUp {
+      from {transform: translateY(50px); opacity: 0;}
+      to {transform: translateY(0); opacity: 1;}
+    }
+    @keyframes fadeInSubjectRow {
+      from {opacity: 0; transform: translateX(-20px);}
+      to {opacity: 1; transform: translateX(0);}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Studist — Timetable</h1>
+    <div class="meta">Logged in as <strong>{{ username }}</strong></div>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="topbar">
+        <div><div style="font-weight:700; font-size:16px">Edit & Save your weekly timetable</div></div>
+        <div class="controls">
+          <button class="btn" id="edit-subjects-btn">✏️ Edit Subjects</button>
+          <button class="btn" id="save-btn">💾 Save</button>
+          <button class="btn ghost" id="clear-btn">🧹 Clear</button>
+          <a href="/dashboard" class="btn ghost" style="text-decoration:none">⬅ Back to Dashboard</a>
+        </div>
+      </div>
+
+      <div style="overflow:auto;">
+        <table id="timetable">
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>9 - 10</th>
+              <th>10 - 11</th>
+              <th>11 - 12</th>
+              <th>12 - 1</th>
+              <th>1 - 2</th>
+              <th>2 - 3</th>
+              <th>3 - 4</th>
+              <th>4 - 5</th>
+              <th>5 - 6</th>
+              <th>6 - 7</th>
+              <th>7 - 8</th>
+              <th>8 - 9</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th>Monday</th><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td></tr>
+            <tr><th>Tuesday</th><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td></tr>
+            <tr><th>Wednesday</th><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td></tr>
+            <tr><th>Thursday</th><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td></tr>
+            <tr><th>Friday</th><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td></tr>
+            <tr><th>Saturday</th><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td><td class="slot"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="small-muted">Tip: Click "Edit Subjects" to add/rename subjects — your changes save per user.</footer>
+    </div>
+  </div>
+
+  <div id="subject-modal-back" class="modal-backdrop">
+    <div class="modal" role="dialog" aria-modal="true">
+      <h3 style="margin:0 0 8px 0">Edit Subjects</h3>
+      <div class="small-muted">Add, rename or remove subjects. Order matters — these appear in dropdowns.</div>
+      <div id="subject-list" style="margin-top:12px; max-height:320px; overflow:auto"></div>
+      <div style="display:flex; gap:8px; margin-top:12px; justify-content:flex-end">
+        <button class="btn ghost" id="add-subject-btn" type="button">➕ Add new</button>
+        <button class="btn" id="save-subjects-btn" type="button">Save Subjects</button>
+        <button class="btn ghost" id="close-subjects-btn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    let subjects = [];
+
+    function buildSlots() {
+      document.querySelectorAll("td.slot").forEach(cell=>{
+        cell.innerHTML = "";
+        const sel = document.createElement("select");
+        sel.className = "subject-select";
+        sel.innerHTML = "<option value=''>-- Free --</option>";
+        const note = document.createElement("div");
+        note.className = "note";
+        note.contentEditable = true;
+        note.setAttribute('aria-label','slot note');
+        cell.appendChild(sel);
+        cell.appendChild(note);
+      });
+    }
+
+    function populateDropdowns() {
+      const selects = document.querySelectorAll(".subject-select");
+      selects.forEach(s=>{
+        const cur = s.value || "";
+        s.innerHTML = "<option value=''>-- Free --</option>";
+        let localSubjects = Array.isArray(subjects) && subjects.length ? subjects.slice() : ["Free","Break"];
+        localSubjects.forEach(sub=>{
+          const opt = document.createElement("option");
+          opt.value = sub; opt.textContent = sub; s.appendChild(opt);
+        });
+        if(cur) s.value = cur;
+      });
+    }
+
+    function loadSubjects(){
+      return fetch('/get-subjects').then(r=> r.ok ? r.json() : [])
+        .catch(()=>[])
+        .then(arr=>{
+          subjects = Array.isArray(arr)?arr:[];
+          populateDropdowns();
+          renderSubjectEditor();
+          return subjects;
+        });
+    }
+
+    function loadTimetable(){
+      buildSlots();
+      populateDropdowns();
+      return fetch('/get-timetable').then(res=>res.ok?res.json():{}).catch(()=>fetch('/load-timetable').then(r=>r.ok?r.json():{}).catch(()=>({})))
+        .then(data=>{
+          if(data && data.timetable) data=data.timetable;
+          DAYS.forEach((day, idx)=>{
+            const row=document.querySelectorAll('#timetable tbody tr')[idx];
+            const slots=(data && data[day])?data[day]:[];
+            for(let c=1;c<=12;c++){  // Updated to 12 slots
+              const cell=row.cells[c];
+              const sel=cell.querySelector('.subject-select');
+              const note=cell.querySelector('.note');
+              const slotData=slots[c-1];
+              if(!slotData){ sel.value=""; note.innerText=""; cell.classList.add('free'); continue;}
+              if(typeof slotData==="string"){ sel.value=slotData; note.innerText="";}
+              else if(slotData && typeof slotData==="object"){ sel.value=slotData.value||""; note.innerText=slotData.note||"";}
+              else{ sel.value=""; note.innerText="";}
+              cell.classList.toggle('free',!sel.value);
+            }
+          });
+          populateDropdowns();
+        });
+    }
+
+    function saveTimetable(){
+      const rows=document.querySelectorAll('#timetable tbody tr');
+      const payload={};
+      rows.forEach(row=>{
+        const day=row.cells[0].innerText.trim();
+        payload[day]=[];
+        for(let c=1;c<row.cells.length;c++){
+          const sel=row.cells[c].querySelector('.subject-select');
+          const note=row.cells[c].querySelector('.note');
+          payload[day].push({ value: sel? sel.value.trim():"", note: note? note.innerText.trim():"" });
+        }
+      });
+      fetch('/save-timetable',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({timetable:payload})
+      }).then(r=>r.json()).then(res=>{ alert(res?.message||'Saved'); }).catch(()=>alert('Error saving timetable'));
+    }
+
+    function clearTimetable(){
+      document.querySelectorAll('#timetable tbody tr').forEach(row=>{
+        for(let c=1;c<row.cells.length;c++){
+          const sel=row.cells[c].querySelector('.subject-select');
+          const note=row.cells[c].querySelector('.note');
+          if(sel) sel.value=""; if(note) note.innerText="";
+          row.cells[c].classList.add('free');
+        }
+      });
+    }
+
+    const modalBack=document.getElementById('subject-modal-back');
+    const subjectListDiv=document.getElementById('subject-list');
+
+    function renderSubjectEditor(){
+      subjectListDiv.innerHTML='';
+      const current=Array.isArray(subjects)&&subjects.length?subjects.slice():[];
+      if(current.length===0) current.push("Free","Break");
+      current.forEach((s,i)=>{
+        const row=document.createElement('div');
+        row.className='subject-row';
+        row.innerHTML=`<input type="text" class="subj-input" value="${escapeHtml(s)}" />
+        <button data-i="${i}" class="del-subj-btn" title="Delete">✖</button>`;
+        subjectListDiv.appendChild(row);
+      });
+      attachDeleteButtons();
+    }
+
+    function attachDeleteButtons(){
+      subjectListDiv.querySelectorAll('.del-subj-btn').forEach(btn=>{
+        btn.addEventListener('click',e=>{
+          const i=Number(e.target.dataset.i);
+          subjects.splice(i,1);
+          renderSubjectEditor();
+        });
+      });
+    }
+
+    function openSubjectsModal(){ modalBack.style.display='flex'; renderSubjectEditor(); }
+    function closeSubjectsModal(){ modalBack.style.display='none'; }
+
+    document.getElementById('add-subject-btn').addEventListener('click',()=>{
+      const input=document.createElement('div');
+      input.className='subject-row';
+      input.innerHTML=`<input type="text" class="subj-input" value="" /><button class="del-subj-btn" title="Delete">✖</button>`;
+      subjectListDiv.appendChild(input);
+      attachDeleteButtons();
+    });
+
+    document.getElementById('save-subjects-btn').addEventListener('click',()=>{
+      const arr=Array.from(document.querySelectorAll('.subj-input')).map(i=>i.value.trim()).filter(s=>s);
+      const unique=Array.from(new Set(arr));
+      fetch('/update-subjects',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({subjects:unique})
+      }).then(r=>r.json()).then(res=>{
+        subjects=res?.subjects||unique;
+        populateDropdowns(); closeSubjectsModal(); alert('Subjects saved');
+      }).catch(()=>alert('Could not save subjects'));
+    });
+
+    document.getElementById('edit-subjects-btn').addEventListener('click', openSubjectsModal);
+    document.getElementById('close-subjects-btn').addEventListener('click', closeSubjectsModal);
+    document.getElementById('save-btn').addEventListener('click', saveTimetable);
+    document.getElementById('clear-btn').addEventListener('click',()=>{ if(confirm('Clear all timetable entries?')) clearTimetable(); });
+
+    function escapeHtml(unsafe){ 
+      return unsafe.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;"); 
+    }
+
+    (function init(){ buildSlots(); loadSubjects().then(()=>loadTimetable()); })();
+  </script>
+</body>
+</html>

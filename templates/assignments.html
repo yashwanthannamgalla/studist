@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ username }}'s Assignments | Studist</title>
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f0f6ff;
+      margin: 0; padding: 40px 20px;
+      color: #1d2336;
+      min-height: 100vh;
+      display: flex; justify-content: center; flex-direction: column; align-items: center;
+    }
+    .container {
+      max-width: 900px;
+      width: 90%;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      padding: 30px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    h2 {
+      font-weight: 600;
+      font-size: 2rem;
+      color: #2a3a67;
+      text-align: center;
+      margin: 0;
+    }
+    .assign-card {
+      background: #f9f9f9;
+      border-radius: 14px;
+      padding: 18px 24px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .assign-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 34px rgba(46,61,123,0.12);
+    }
+    .assign-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 70%;
+    }
+    .assign-info strong {
+      font-size: 1.15rem;
+      color: #2a3a67;
+      font-weight: 600;
+    }
+    .assign-info small {
+      color: #6d7585;
+      font-size: 0.9rem;
+    }
+    .assign-info small.status {
+      font-weight: 700;
+      color: #10b981;
+    }
+    .assign-info small.status.pending {
+      color: #ef4444;
+    }
+    .btn {
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-left: 8px;
+      transition: filter 0.2s ease;
+    }
+    .complete-btn {
+      background: #10b981;
+      color: white;
+    }
+    .complete-btn:hover {
+      filter: brightness(0.9);
+    }
+    .delete-btn {
+      background: #ef4444;
+      color: white;
+    }
+    .delete-btn:hover {
+      filter: brightness(0.9);
+    }
+    .add-new {
+      display: block;
+      margin: 30px auto 0 auto;
+      max-width: 320px;
+      text-align: center;
+      background: #4a7ec9;
+      color: white;
+      font-weight: 600;
+      padding: 14px 0;
+      border-radius: 14px;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: filter 0.2s ease;
+    }
+    .add-new:hover {
+      filter: brightness(1.1);
+    }
+    .back-btn {
+      max-width: 190px;
+      margin: 20px auto 0 auto;
+      background: linear-gradient(90deg,#45aaf2,#9b59b6);
+      color: white;
+      padding: 14px 0;
+      border-radius: 16px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      text-align: center;
+      display: block;
+      transition: filter 0.3s ease;
+    }
+    .back-btn:hover {
+      filter: brightness(1.15);
+    }
+    /* New styles for assignment generator form */
+    #genAssignmentContainer {
+      background: #f0f4ff;
+      border: 1px solid #4a7ec9;
+      border-radius: 14px;
+      padding: 20px 24px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 4px 20px rgba(74,126,201,0.2);
+    }
+    #genAssignmentContainer h3 {
+      color: #2a3a67;
+      font-weight: 600;
+      margin-top: 0;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    #genAssignmentContainer label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #2a3a67;
+    }
+    #genAssignmentContainer input[type="text"],
+    #genAssignmentContainer textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #4a7ec9;
+      border-radius: 6px;
+      resize: vertical;
+      box-sizing: border-box;
+      font-size: 14px;
+      margin-bottom: 20px;
+      font-family: 'Inter', sans-serif;
+    }
+    #genAssignmentContainer button {
+      background-color: #4a7ec9;
+      color: white;
+      font-weight: 700;
+      padding: 12px 0;
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: filter 0.2s ease;
+    }
+    #genAssignmentContainer button:hover {
+      filter: brightness(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📚 {{ username }}'s Assignments</h2>
+
+    {% if assignments %}
+      {% for a in assignments %}
+        <div class="assign-card">
+          <div class="assign-info">
+            <strong>{{ a.subject }}</strong>
+            <small>Due: {{ a.due_date }}</small>
+            <small>{{ a.description }}</small>
+            <small class="status {% if not a.completed %}pending{% endif %}">
+              Status: {% if a.completed %}✅ Completed{% else %}❌ Pending{% endif %}
+            </small>
+          </div>
+          <div>
+            <button class="btn complete-btn" onclick="toggleComplete('{{ a.subject }}', {{ a.completed | tojson }})">
+              {% if a.completed %}Mark Pending{% else %}Mark Complete{% endif %}
+            </button>
+            <button class="btn delete-btn" onclick="deleteAssignment('{{ a.subject }}')">Delete</button>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p style="text-align:center; font-style: italic; margin-top: 40px; color: #7a7a7a;">No assignments yet.</p>
+    {% endif %}
+
+    <a href="/add-assignment?user={{ username }}" class="add-new">➕ Add New Assignment</a>
+
+    <!-- Assignment Generator Form Section -->
+    <div id="genAssignmentContainer">
+      <h3>📝 Generate Assignment Document</h3>
+      <form id="assignmentForm" enctype="multipart/form-data">
+        <label for="topic">Assignment Topic:</label>
+        <input type="text" id="topic" name="topic" required />
+
+        <label for="file">Upload Handwriting PDF/Image:</label>
+        <input type="file" id="file" name="file" accept=".pdf, .png, .jpg, .jpeg" required />
+
+        <button type="submit">Generate & Download</button>
+      </form>
+    </div>
+  </div>
+
+  <a href="/dashboard?user={{ username }}" class="back-btn">⬅ Back to Dashboard</a>
+
+  <script>
+    const username = "{{ username }}";
+
+    function toggleComplete(subject, completed) {
+      fetch('/update-assignment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, subject: subject, completed: !completed })
+      }).then(() => location.reload());
+    }
+
+    function deleteAssignment(subject) {
+      fetch('/delete-assignment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, subject: subject })
+      }).then(() => location.reload());
+    }
+
+    // Handle Generate Assignment form submission
+    document.getElementById('assignmentForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const topic = document.getElementById('topic').value;
+      const fileInput = document.getElementById('file');
+      if (fileInput.files.length === 0) {
+        alert('Please upload a handwriting PDF or image.');
+        return;
+      }
+      const file = fileInput.files[0];
+
+      const formData = new FormData();
+      formData.append('topic', topic);
+      formData.append('file', file);
+      formData.append('username', username);
+
+      const response = await fetch('/upload-handwriting', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        alert('Error: ' + (errData.error || 'Failed to generate assignment.'));
+        return;
+      }
+
+      // Response will be the Word file to download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${topic}_assignment.docx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
