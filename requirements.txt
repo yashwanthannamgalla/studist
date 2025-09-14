@@ -9,4 +9,5 @@ itsdangerous
 blinker
 markupsafe
 packaging
+numpy
 Space
