@@ -2,3 +2,11 @@ Flask==3.1.2
 gunicorn==23.0.0
 pdf2image
 python-docx
+werkzeug
+click
+jinja2
+itsdangerous
+blinker
+markupsafe
+packaging
+Space
